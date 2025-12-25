@@ -18,46 +18,58 @@ import { EditMangaModal } from './components/EditMangaModal';
 import { colors } from './constants/colors';
 
 export default function App() {
+  // State for manga biblioteket
   const [library, setLibrary] = useState<MangaLibrary>({});
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [selectedManga, setSelectedManga] = useState<string | null>(null);
+  
+  // State for modals
+  const [modalVisible, setModalVisible] = useState(false);        // Add modal
+  const [editModalVisible, setEditModalVisible] = useState(false); // Edit modal
+  const [selectedManga, setSelectedManga] = useState<string | null>(null);  // Hvilken manga som redigeres
+  
+  // State for filter
   const [activeFilter, setActiveFilter] = useState<FilterTab>('All');
   
-  // Form states
+  // Form state (brukes i begge modals)
   const [newTitle, setNewTitle] = useState('');
   const [newChapter, setNewChapter] = useState('0');
   const [newStatus, setNewStatus] = useState<MangaStatus>('Reading');
 
+  // Last inn biblioteket når appen starter
   useEffect(() => {
     loadLibraryData();
   }, []);
 
+  // Funksjon for å laste biblioteket fra AsyncStorage
   const loadLibraryData = async () => {
     const data = await loadLibrary();
     setLibrary(data);
   };
 
+  // Funksjon for å oppdatere biblioteket (både state og AsyncStorage)
   const updateLibrary = async (newLibrary: MangaLibrary) => {
-    await saveLibrary(newLibrary);
-    setLibrary(newLibrary);
+    await saveLibrary(newLibrary);  // Lagre til AsyncStorage
+    setLibrary(newLibrary);         // Oppdater state
   };
 
+  // Legg til ny manga
   const addManga = () => {
+    // Validering: Sjekk at tittel ikke er tom
     if (!newTitle.trim()) {
       Alert.alert('Error', 'Please enter a manga title');
       return;
     }
 
+    // Opprett nytt library objekt med den nye mangaen
     const updatedLibrary: MangaLibrary = {
       ...library,
       [newTitle]: {
         current_chapter: parseInt(newChapter) || 0,
         status: newStatus,
-        last_read: Date.now(),
+        last_read: Date.now(),  // Sett timestamp
       },
     };
 
+    // Lagre og reset form
     updateLibrary(updatedLibrary);
     setNewTitle('');
     setNewChapter('0');
@@ -65,13 +77,16 @@ export default function App() {
     setModalVisible(false);
   };
 
+  // Åpne edit modal for en spesifikk manga
   const openEditModal = (title: string) => {
     setSelectedManga(title);
+    // Fyll ut form med eksisterende data
     setNewChapter(library[title].current_chapter.toString());
     setNewStatus(library[title].status);
     setEditModalVisible(true);
   };
 
+  // Lagre endringer fra edit modal
   const saveEdit = () => {
     if (selectedManga) {
       const updatedLibrary: MangaLibrary = {
@@ -79,7 +94,7 @@ export default function App() {
         [selectedManga]: {
           current_chapter: parseInt(newChapter) || 0,
           status: newStatus,
-          last_read: Date.now(),
+          last_read: Date.now(),  // Oppdater timestamp
         },
       };
       updateLibrary(updatedLibrary);
@@ -88,6 +103,7 @@ export default function App() {
     }
   };
 
+  // Slett manga (med bekreftelse)
   const removeManga = (title: string) => {
     Alert.alert(
       'Confirm Delete',
@@ -99,7 +115,7 @@ export default function App() {
           style: 'destructive',
           onPress: () => {
             const updatedLibrary = { ...library };
-            delete updatedLibrary[title];
+            delete updatedLibrary[title];  // Fjern fra biblioteket
             updateLibrary(updatedLibrary);
           },
         },
@@ -107,20 +123,24 @@ export default function App() {
     );
   };
 
+  // Filtrer og sorter manga listen
   const getFilteredMangaList = (): Manga[] => {
+    // Konverter library objekt til array
     let mangaArray = Object.entries(library).map(([title, data]) => ({
       title,
       ...data,
     }));
 
+    // Filtrer basert på aktiv tab (All viser alt)
     if (activeFilter !== 'All') {
       mangaArray = mangaArray.filter(manga => manga.status === activeFilter);
     }
 
+    // Sorter etter sist lest (nyeste først)
     mangaArray.sort((a, b) => {
       const aTime = a.last_read || 0;
       const bTime = b.last_read || 0;
-      return bTime - aTime;
+      return bTime - aTime;  // Nyeste først
     });
 
     return mangaArray;
@@ -130,8 +150,11 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      {/* Status bar (klokke, batteri, etc) */}
       <StatusBar barStyle="light-content" backgroundColor={colors.surface} />
+      
       <SafeAreaView style={styles.safeArea}>
+        {/* Header med tittel og Add knapp */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>📚 Manga Library</Text>
           <TouchableOpacity
@@ -142,12 +165,15 @@ export default function App() {
           </TouchableOpacity>
         </View>
 
+        {/* Filter tabs (All, Reading, Completed, Dropped) */}
         <FilterTabs 
           activeFilter={activeFilter} 
           onFilterChange={setActiveFilter} 
         />
 
+        {/* Vis enten tom state eller manga liste */}
         {mangaList.length === 0 ? (
+          // Tom state - vis melding
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>
               {activeFilter === 'All' 
@@ -159,6 +185,7 @@ export default function App() {
             </Text>
           </View>
         ) : (
+          // Manga liste - vis alle kort
           <FlatList
             data={mangaList}
             renderItem={({ item }) => (
@@ -173,6 +200,7 @@ export default function App() {
           />
         )}
 
+        {/* Add manga modal */}
         <AddMangaModal
           visible={modalVisible}
           title={newTitle}
@@ -184,12 +212,14 @@ export default function App() {
           onAdd={addManga}
           onCancel={() => {
             setModalVisible(false);
+            // Reset form når modal lukkes
             setNewTitle('');
             setNewChapter('0');
             setNewStatus('Reading');
           }}
         />
 
+        {/* Edit manga modal */}
         <EditMangaModal
           visible={editModalVisible}
           mangaTitle={selectedManga}
@@ -212,7 +242,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 40,  // Manuell padding for status bar
   },
   header: {
     flexDirection: 'row',
@@ -241,7 +271,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 40,  // Ekstra padding på bunn for Android nav knapper
   },
   emptyState: {
     flex: 1,

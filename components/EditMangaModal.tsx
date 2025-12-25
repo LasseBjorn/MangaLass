@@ -10,17 +10,19 @@ import {
 import { MangaStatus } from '../types/manga';
 import { colors, getStatusColor } from '../constants/colors';
 
+// Props for EditMangaModal komponenten
 interface EditMangaModalProps {
-  visible: boolean;
-  mangaTitle: string | null;
-  chapter: string;
-  status: MangaStatus;
-  onChapterChange: (text: string) => void;
-  onStatusChange: (status: MangaStatus) => void;
-  onSave: () => void;
-  onCancel: () => void;
+  visible: boolean;                              // Om modalen er synlig
+  mangaTitle: string | null;                     // Tittel på manga som redigeres
+  chapter: string;                               // Nåværende chapter verdi
+  status: MangaStatus;                           // Nåværende status
+  onChapterChange: (text: string) => void;       // Kalles når chapter endres
+  onStatusChange: (status: MangaStatus) => void; // Kalles når status endres
+  onSave: () => void;                            // Kalles når Save trykkes
+  onCancel: () => void;                          // Kalles når Cancel trykkes
 }
 
+// Modal for å redigere eksisterende manga
 export const EditMangaModal: React.FC<EditMangaModalProps> = ({
   visible,
   mangaTitle,
@@ -31,6 +33,7 @@ export const EditMangaModal: React.FC<EditMangaModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  // Status knapp komponent (samme som i AddMangaModal)
   const StatusButton = ({ statusOption }: { statusOption: MangaStatus }) => (
     <TouchableOpacity
       style={[
@@ -60,8 +63,10 @@ export const EditMangaModal: React.FC<EditMangaModalProps> = ({
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
+          {/* Vis manga tittel i overskrift */}
           <Text style={styles.modalTitle}>Edit {mangaTitle}</Text>
 
+          {/* Chapter input (kan ikke endre tittel i edit mode) */}
           <TextInput
             style={styles.input}
             placeholder="Current chapter"
@@ -71,6 +76,7 @@ export const EditMangaModal: React.FC<EditMangaModalProps> = ({
             keyboardType="numeric"
           />
 
+          {/* Status selector */}
           <Text style={styles.label}>Status:</Text>
           <View style={styles.statusContainer}>
             <StatusButton statusOption="Reading" />
@@ -78,6 +84,7 @@ export const EditMangaModal: React.FC<EditMangaModalProps> = ({
             <StatusButton statusOption="Dropped" />
           </View>
 
+          {/* Cancel og Save knapper */}
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={[styles.modalButton, styles.cancelButton]}
@@ -98,6 +105,7 @@ export const EditMangaModal: React.FC<EditMangaModalProps> = ({
   );
 };
 
+// Styles er identiske med AddMangaModal
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
