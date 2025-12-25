@@ -10,18 +10,20 @@ import {
 import { MangaStatus } from '../types/manga';
 import { colors, getStatusColor } from '../constants/colors';
 
+// Props for AddMangaModal komponenten
 interface AddMangaModalProps {
-  visible: boolean;
-  title: string;
-  chapter: string;
-  status: MangaStatus;
-  onTitleChange: (text: string) => void;
-  onChapterChange: (text: string) => void;
-  onStatusChange: (status: MangaStatus) => void;
-  onAdd: () => void;
-  onCancel: () => void;
+  visible: boolean;                           // Om modalen er synlig
+  title: string;                              // Verdi i tittel input
+  chapter: string;                            // Verdi i chapter input
+  status: MangaStatus;                        // Valgt status
+  onTitleChange: (text: string) => void;      // Kalles når tittel endres
+  onChapterChange: (text: string) => void;    // Kalles når chapter endres
+  onStatusChange: (status: MangaStatus) => void;  // Kalles når status endres
+  onAdd: () => void;                          // Kalles når Add knapp trykkes
+  onCancel: () => void;                       // Kalles når Cancel trykkes
 }
 
+// Modal for å legge til ny manga
 export const AddMangaModal: React.FC<AddMangaModalProps> = ({
   visible,
   title,
@@ -33,18 +35,21 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
   onAdd,
   onCancel,
 }) => {
+  // Komponent for status knapper (Reading, Completed, Dropped)
   const StatusButton = ({ statusOption }: { statusOption: MangaStatus }) => (
     <TouchableOpacity
       style={[
         styles.statusButton,
+        // Aktiv style hvis denne status er valgt
         status === statusOption && styles.statusButtonActive,
-        { borderColor: getStatusColor(statusOption) },
+        { borderColor: getStatusColor(statusOption) },  // Border farge basert på status
       ]}
       onPress={() => onStatusChange(statusOption)}
     >
       <Text
         style={[
           styles.statusButtonText,
+          // Hvit tekst hvis aktiv
           status === statusOption && { color: colors.text },
         ]}
       >
@@ -56,14 +61,17 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onCancel}
+      animationType="slide"  // Slide inn fra bunnen
+      transparent={true}     // Transparent bakgrunn
+      onRequestClose={onCancel}  // Android back knapp
     >
+      {/* Mørk overlay */}
       <View style={styles.modalOverlay}>
+        {/* Modal innhold */}
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Add New Manga</Text>
 
+          {/* Tittel input */}
           <TextInput
             style={styles.input}
             placeholder="Manga title"
@@ -72,6 +80,7 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
             onChangeText={onTitleChange}
           />
 
+          {/* Chapter input - kun tall */}
           <TextInput
             style={styles.input}
             placeholder="Current chapter"
@@ -81,6 +90,7 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
             keyboardType="numeric"
           />
 
+          {/* Status selector */}
           <Text style={styles.label}>Status:</Text>
           <View style={styles.statusContainer}>
             <StatusButton statusOption="Reading" />
@@ -88,6 +98,7 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
             <StatusButton statusOption="Dropped" />
           </View>
 
+          {/* Cancel og Add knapper */}
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={[styles.modalButton, styles.cancelButton]}
@@ -111,7 +122,7 @@ export const AddMangaModal: React.FC<AddMangaModalProps> = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Mørk transparent bakgrunn
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -147,13 +158,13 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   statusContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row',  // Knapper ved siden av hverandre
     justifyContent: 'space-between',
     marginBottom: 24,
     gap: 8,
   },
   statusButton: {
-    flex: 1,
+    flex: 1,  // Like stor plass til hver knapp
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 2,
@@ -161,7 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
   },
   statusButtonActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primary,  // Blå bakgrunn når aktiv
     borderColor: colors.primary,
   },
   statusButtonText: {
